@@ -5,5 +5,5 @@ usage:$0 PMTS/MSG/DIRECTORY
 EOF
 else
 	cd $1
-	sed -s '/=======/,/=======/ d' $(ls -tr)
+	sed -s '/=======/,/=======/ d' $(ls -tr |grep -v lck)
 fi
