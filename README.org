@@ -8,7 +8,7 @@
 
 * Usage
 #+begin_src shell
-  python3 pmtsLogAnalysis.py success.msg*
+  python3 pmtsLogAnalysis.py /path/to/success.msg*
 #+end_src
 
 该命令会分析PMTS 中的 success.msg 日志，并将每个报文的 =报文编号=, =报文类型=, =原报文编号=, =PMTS接收时间=, =上一节点时间=, =MQ队列名称= 等内容插入到 =pmts.db= 中的 =PMTSLOGDATA= 表中。

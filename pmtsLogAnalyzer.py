@@ -69,24 +69,25 @@ def pmtsFile2DB(pmts_file, cursor):
 
 
 
-db_file = "pmts.db"
-db_is_new = not os.path.exists(db_file)
-with sqlite3.connect(db_file) as db_conn:
-    if db_is_new:
-        print("Creating db schema")
-        sql = '''create table PMTSLOGDATA(
-        msgid  varchar(50) primary key,
-        msgtype varchar(50),
-        orgnl_msgid  varchar(50),
-        pmts_time timestamp,
-        last_node_time timestamp,
-        mq_name varchar(50),
-        mqsq_name varchar(50),
-        mqtq_name varchar(50))
-        '''
-        db_conn.executescript(sql)
+if __name__ == '__main__':
+    db_file = "pmts.db"
+    db_is_new = not os.path.exists(db_file)
+    with sqlite3.connect(db_file) as db_conn:
+        if db_is_new:
+            print("Creating db schema")
+            sql = '''create table PMTSLOGDATA(
+            msgid  varchar(50) primary key,
+            msgtype varchar(50),
+            orgnl_msgid  varchar(50),
+            pmts_time timestamp,
+            last_node_time timestamp,
+            mq_name varchar(50),
+            mqsq_name varchar(50),
+            mqtq_name varchar(50))
+            '''
+            db_conn.executescript(sql)
 
-    cursor = db_conn.cursor()
+        cursor = db_conn.cursor()
 
-    for pmtsLogFile in sys.argv[1:]:
-        pmtsFile2DB(pmtsLogFile, cursor)
+        for pmtsLogFile in sys.argv[1:]:
+            pmtsFile2DB(pmtsLogFile, cursor)
