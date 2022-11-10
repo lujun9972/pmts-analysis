@@ -2,6 +2,9 @@
 import sqlite3
 import sys
 import os
+import time
+import xml.dom.minidom
+from xml.dom.minidom import parse
 
 def readPackge(reader):
     content = []
@@ -16,10 +19,10 @@ def readPackge(reader):
     # read the rest content
     for line in reader:
         content.append(line.strip())
-        if len(content) > 4 and content[-1] == "" and content[-2] == "" and content[-3] == "" and content[-4] == "":
+        if len(content) > 4 and content[-1] == "" and content[-2] == "" and content[-3] == "" :
             break
     # print(content[:-4])
-    return content[:-4]
+    return content[:-3]
 
 def analysisPackge(package):
     pmts_time = package[0][1:23]
@@ -30,18 +33,30 @@ def analysisPackge(package):
     msgtype = ""
     msgid = ""
     orgnl_msgid = ""
-    for line in package[4:]:
-        if line.startswith("{H:"):
-            index = line.find("XML")
-            msgtype = line[index+3:index+18]
-        elif "<MsgId>" in line:
-            start=line.find("<MsgId>")+len("<MsgId>")
-            end=line.find("</MsgId>")
-            msgid = line[start:end]
-        elif "<OrgnlMsgId>" in line:
-            start=line.find("<OrgnlMsgId>")+len("<OrgnlMsgId>")
-            end=line.find("</OrgnlMsgId>")
-            orgnl_msgid = line[start:end]
+    if package[6].startswith("{H:"):
+        Hline = package[6]
+        content = "".join(package[7:])
+    else:
+        Hline = package[7]
+        content = "".join(package[8:])
+    index = Hline.find("XML")
+    msgtype = Hline[index+3:index+18]
+    # 查找 xml 报文开始的位置
+    xmlStart = content.find("<?xml")
+    content = content[xmlStart:]
+    domTree = xml.dom.minidom.parseString(content)
+    # msgid = domTree.getElementsByTagName("MsgId")[0].firstChild.data
+    if "<MsgId>" in content:
+        start=content.find("<MsgId>")+len("<MsgId>")
+        end=content.find("</MsgId>")
+        msgid = content[start:end]
+        # assert msgid1 == msgid
+    if "<OrgnlMsgId>" in content:
+        start=content.find("<OrgnlMsgId>")+len("<OrgnlMsgId>")
+        end=content.find("</OrgnlMsgId>")
+        orgnl_msgid = content[start:end]
+    elif msgtype == "saps.601.001.01":
+        orgnl_msgid = domTree.getElementsByTagName("Id")[0].firstChild.data
     return {'pmts_time': pmts_time,
             'last_node_time': last_node_time,
             'mq_name': mq_name,
